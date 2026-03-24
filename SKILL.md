@@ -1,10 +1,17 @@
 ---
 name: openclaw-workspace-governance
-description: 虾滑 OpenClaw 工作区治理：用于治理和升级复杂 OpenClaw 工作区，覆盖多 Agent 治理、权威事实分层、查询分类路由、语义搜索诊断、工作集保鲜与维护收口；Xiahua OpenClaw Workspace Governance for complex OpenClaw workspaces, covering multi-agent governance, source-of-truth layering, query-class retrieval routing, semantic-search diagnostics, freshness working sets, and maintenance-mode closure.
-version: 1.0.6
+description: 🚨【高危预警 / IMPORTANT WARNING】这不是工具Skill，而是系统级架构升级！部署前务必备份工作区！This is NOT a standard tool skill, but a system-level architecture upgrade! Backup workspace before deployment! 虾滑 OpenClaw 工作区治理：用于治理和升级复杂 OpenClaw 工作区，覆盖多 Agent 治理、权威事实分层、查询分类路由、语义搜索诊断、工作集保鲜与维护收口。
+version: 1.0.7
 ---
 
 # 虾滑 OpenClaw 工作区治理（OpenClaw Workspace Governance）
+
+> 🚨 **高危/重要提示 (IMPORTANT WARNING)** 🚨
+> **这不是一个普通的工具型 Skill，而是针对 OpenClaw 工作区的系统级架构升级与治理方案。**
+> **在让你的 Agent 实施本指南之前，请务必对你的 Workspace 进行完整备份，并确保你理解其对文件状态和检索优先级的改变。请勿在未做快照的生产环境中盲目运行全自动治理！**
+> 
+> ***This is NOT a standard tool-level skill. It is a system-level architecture upgrade and governance framework for your OpenClaw workspace.***
+> ***Before allowing your Agent to implement these guidelines, you MUST take a full backup of your workspace. Do not run automated governance in a production environment without understanding how it alters document states and retrieval routing.***
 
 这是一个面向**复杂 OpenClaw 工作区**的治理型 skill。它不是为了制造更多流程，而是为了在复杂度已经上来之后，帮你压住漂移、明确当前事实层、缩小 live docs 面积，并让语义检索变得更可控。
 
