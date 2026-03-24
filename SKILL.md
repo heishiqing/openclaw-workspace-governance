@@ -1,7 +1,7 @@
 ---
 name: openclaw-workspace-governance
 description: 🚨【高危预警 / IMPORTANT WARNING】这不是工具Skill，而是系统级架构升级！部署前务必备份工作区！This is NOT a standard tool skill, but a system-level architecture upgrade! Backup workspace before deployment! 虾滑 OpenClaw 工作区治理：用于治理和升级复杂 OpenClaw 工作区，覆盖多 Agent 治理、权威事实分层、查询分类路由、语义搜索诊断、工作集保鲜与维护收口。
-version: 1.0.7
+version: 1.0.8
 ---
 
 # 虾滑 OpenClaw 工作区治理（OpenClaw Workspace Governance）
