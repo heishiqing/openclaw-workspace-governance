@@ -53,6 +53,15 @@
 - 在 v1 里做全自动多 Agent 编排
 - 因为“怕以后要用”而让所有旧文档都保持 live
 
+
+### 系统能力详解 (System Capabilities)
+
+本 Skill 提供了一套完整的系统级框架，赋予你的 OpenClaw 以下核心能力：
+- **多 Agent 协作架构 (Multi-Agent Architecture)**：建立以 Supervisor 为中心的调度机制，实现“写审分离”。明确区分代码编写、代码审查、规则审核、文档撰写等专职岗位，防止单一 Agent 越权闭环。
+- **分层记忆系统 (Layered Memory System)**：告别无序的长文档堆砌。建立从“原始日志 (Daily Notes)”到“主题卡片 (Topic Cards)”，再到“长期记忆 (Long-Term Memory)”的逐层蒸馏与质量门控机制。
+- **语义检索与路由 (Semantic Retrieval Routing)**：将系统查询分类（如：状态查询、规则边界、历史溯源等），并建立基于桥接文件 (Bridge Files)、结构化记忆与 qmd 语义搜索的精准召回优先级。
+- **审批与安全治理 (Approval & Governance)**：强制核心文件（如 AGENTS.md）的修改必须经过独立评审与人工授权；内置针对特定岗位的“防偷懒协议（代码交付契约）”，保障自动化任务的执行完整性。
+
 ### 快速开始
 
 先别急着改文件，先判清楚你遇到的是哪一种 drift。主线只有六步：
@@ -326,6 +335,15 @@ This skill does **not** try to:
 - automate policy changes
 - automate full multi-agent orchestration in v1
 - keep every old document live "just in case"
+
+
+### System Capabilities
+
+This skill provides a complete system-level framework, empowering your OpenClaw with the following core capabilities:
+- **Multi-Agent Architecture**: Establishes a Supervisor-centric dispatch mechanism, ensuring "separation of writing and reviewing". It clearly separates roles like code generation, code review, policy auditing, and documentation, preventing any single agent from making unauthorized closed-loop decisions.
+- **Layered Memory System**: Moves away from chaotic long documents. It builds a progressive distillation and quality-gating mechanism from "Raw Daily Notes" to "Topic Cards" and finally to "Long-Term Memory".
+- **Semantic Retrieval Routing**: Classifies system queries (e.g., state queries, rule boundaries, historical traces) and establishes precise recall priorities across bridge files, structured memory, and qmd semantic search.
+- **Approval & Governance**: Mandates that modifications to core files (like AGENTS.md) must pass independent review and human authorization. It includes built-in "anti-laziness protocols (code delivery contracts)" for specific roles to ensure the completeness of automated tasks.
 
 ### Quick Start
 
