@@ -13,6 +13,10 @@
   <a href="docs/GUIDE_ZH.md">🇨🇳 简体中文详细指南</a> &nbsp;·&nbsp; <a href="docs/GUIDE_EN.md">🇬🇧 English Detailed Guide</a>
 </p>
 
+<p align="center">
+  <a href="docs/DEPLOYMENT_ZH.md">🇨🇳 部署手册（从零开始）</a> &nbsp;·&nbsp; <a href="docs/DEPLOYMENT_EN.md">🇬🇧 Deployment Guide (Step-by-Step)</a>
+</p>
+
 ---
 
 <h2 id="-简体中文">🇨🇳 简体中文</h2>
