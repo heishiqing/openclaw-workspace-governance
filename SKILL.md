@@ -4,13 +4,49 @@ description: 🚨【高危预警】系统级架构升级！部署前务必备份
 version: 1.1.0
 ---
 
-# OpenClaw 工作区治理 — Agent Runbook
+# OpenClaw 工作区治理（Workspace Governance）
 
-> 🚨 **这是系统级架构升级，不是普通工具 Skill。**
+> 🚨 **高危预警** — 这不是普通工具 Skill，而是系统级架构升级。部署前务必备份工作区！
+
+面向**复杂 OpenClaw 工作区**的治理型 Skill。帮你压住漂移、明确当前事实层、缩小 live docs 面积，让语义检索更可控。
+
+### 核心能力
+
+| 能力 | 解决什么问题 |
+|------|------------|
+| **多 Agent 协作架构** | Agent 自己改规则自己审批的闭环 |
+| **分层记忆系统** | 所有文档平等对待导致的冲突 |
+| **语义检索路由** | 对所有问题无脑用 memory_search |
+| **审批与安全治理** | 核心文件被无声修改 |
+| **保鲜纪律** | 文档过期了没人知道 |
+| **收口标准** | 改进阶段无限扩展不收敛 |
+
+### 文档导航
+
+| 文档 | 读者 | 内容 |
+|------|------|------|
+| **本文件 (SKILL.md)** | Agent | 可执行 Runbook：自动检测 → 部署 → 日常运维 |
+| [完整指南（中文）](docs/GUIDE_ZH.md) | 人 | 原理解释 + 详细部署手册 + FAQ |
+| [Complete Guide (English)](docs/GUIDE_EN.md) | Human | Design rationale + deployment guide + FAQ |
+| `references/*.md` | Agent（按需） | 7 篇深入参考文档 |
+
+### 包含内容
+
+- 🤖 Agent 可执行 Runbook（自动检测部署状态，逐步引导部署）
+- 📖 中英文完整指南（12 章节，含部署前评估、4 Phase 部署手册、验证清单）
+- 📚 7 篇治理参考文档（多 Agent 治理、事实分层、检索路由、文档标记、保鲜纪律、语义搜索诊断、收口标准）
+- 🔧 3 个可执行脚本（freshness-check、semantic-runtime-check、doc-status-scan）
+- 📋 4 个示例模板（working-set、health、system-state-index）
+
+---
+
+## Agent Runbook
+
+> 以下内容面向 Agent。按顺序读，按指令执行。
 > 执行任何修改前，先确认用户已备份工作区。
 > 如果用户未确认备份，**停下来提醒**，不要继续。
 
-本文件是你（Agent）的可执行 Runbook。按顺序读，按指令执行。
+本 Runbook 分三部分：
 - **Part 1**：首次部署检测与执行（如果工作区还没部署过）
 - **Part 2**：日常运维工作流（部署完成后的持续使用）
 - **Part 3**：脚本与参考索引
