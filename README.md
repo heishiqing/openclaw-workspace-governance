@@ -10,11 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="docs/GUIDE_ZH.md">🇨🇳 简体中文详细指南</a> &nbsp;·&nbsp; <a href="docs/GUIDE_EN.md">🇬🇧 English Detailed Guide</a>
-</p>
-
-<p align="center">
-  <a href="docs/DEPLOYMENT_ZH.md">🇨🇳 部署手册（从零开始）</a> &nbsp;·&nbsp; <a href="docs/DEPLOYMENT_EN.md">🇬🇧 Deployment Guide (Step-by-Step)</a>
+  <a href="docs/GUIDE_ZH.md">🇨🇳 完整指南（含部署手册）</a> &nbsp;·&nbsp; <a href="docs/GUIDE_EN.md">🇬🇧 Complete Guide (with Deployment)</a>
 </p>
 
 ---
