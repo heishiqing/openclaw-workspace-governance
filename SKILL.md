@@ -1,287 +1,645 @@
 ---
 name: openclaw-workspace-governance
-description: 🚨【高危预警 / IMPORTANT WARNING】这不是工具Skill，而是系统级架构升级！部署前务必备份工作区！This is NOT a standard tool skill, but a system-level architecture upgrade! Backup workspace before deployment! 虾滑 OpenClaw 工作区治理：用于治理和升级复杂 OpenClaw 工作区，覆盖多 Agent 治理、权威事实分层、查询分类路由、语义搜索诊断、工作集保鲜与维护收口。
-version: 1.0.0
+description: 🚨【高危预警】系统级架构升级！部署前务必备份工作区！面向复杂 OpenClaw 工作区的治理 Skill：事实分层、多 Agent 治理、检索路由、保鲜自动化。
+version: 1.1.0
 ---
 
-# 虾滑 OpenClaw 工作区治理（OpenClaw Workspace Governance）
+# OpenClaw 工作区治理 — Agent Runbook
 
-> 🚨 **高危/重要提示 (IMPORTANT WARNING)** 🚨
-> **这不是一个普通的工具型 Skill，而是针对 OpenClaw 工作区的系统级架构升级与治理方案。**
-> **在让你的 Agent 实施本指南之前，请务必对你的 Workspace 进行完整备份，并确保你理解其对文件状态和检索优先级的改变。请勿在未做快照的生产环境中盲目运行全自动治理！**
-> 
-> ***This is NOT a standard tool-level skill. It is a system-level architecture upgrade and governance framework for your OpenClaw workspace.***
-> ***Before allowing your Agent to implement these guidelines, you MUST take a full backup of your workspace. Do not run automated governance in a production environment without understanding how it alters document states and retrieval routing.***
+> 🚨 **这是系统级架构升级，不是普通工具 Skill。**
+> 执行任何修改前，先确认用户已备份工作区。
+> 如果用户未确认备份，**停下来提醒**，不要继续。
 
-这是一个面向**复杂 OpenClaw 工作区**的治理型 skill。它不是为了制造更多流程，而是为了在复杂度已经上来之后，帮你压住漂移、明确当前事实层、缩小 live docs 面积，并让语义检索变得更可控。
+本文件是你（Agent）的可执行 Runbook。按顺序读，按指令执行。
+- **Part 1**：首次部署检测与执行（如果工作区还没部署过）
+- **Part 2**：日常运维工作流（部署完成后的持续使用）
+- **Part 3**：脚本与参考索引
 
-### 系统能力详解 (System Capabilities)
+人类用户如需了解原理和价值，请引导阅读 `docs/GUIDE_ZH.md` 或 `docs/GUIDE_EN.md`。
 
-本 Skill 提供了一套完整的系统级框架，赋予你的 OpenClaw 以下核心能力：
-- **多 Agent 协作架构 (Multi-Agent Architecture)**：建立以 Supervisor 为中心的调度机制，实现“写审分离”。明确区分代码编写、代码审查、规则审核、文档撰写等专职岗位，防止单一 Agent 越权闭环。
-- **分层记忆系统 (Layered Memory System)**：告别无序的长文档堆砌。建立从“原始日志 (Daily Notes)”到“主题卡片 (Topic Cards)”，再到“长期记忆 (Long-Term Memory)”的逐层蒸馏与质量门控机制。
-- **语义检索与路由 (Semantic Retrieval Routing)**：将系统查询分类（如：状态查询、规则边界、历史溯源等），并建立基于桥接文件 (Bridge Files)、结构化记忆与 qmd 语义搜索的精准召回优先级。
-- **审批与安全治理 (Approval & Governance)**：强制核心文件（如 AGENTS.md）的修改必须经过独立评审与人工授权；内置针对特定岗位的“防偷懒协议（代码交付契约）”，保障自动化任务的执行完整性。
+---
 
+## Part 1：首次部署
 
-## 适用场景
+### Step 0：检测部署状态
 
-当你的工作区已经出现真实复杂度时，再用这份 skill。典型信号包括：
-- 多个 Agent 或多角色执行路径已经出现
-- 文档、记忆、状态层越来越多
-- 回答“现在到底什么是真的”开始变难
-- semantic search（语义搜索）有用，但不再能无脑相信
-- live docs 过多、working set 不清、维护开始失控
+执行以下检查，判断工作区当前处于哪个阶段：
 
-⚠️ 这是进阶 skill，不是新手入门包，也不是 v1 的全自动 orchestrator。
+```
+检查项 A：ls memory/SYSTEM_OVERVIEW.md
+检查项 B：grep -l "事实分层\|Source-of-Truth Layering" AGENTS.md
+检查项 C：ls docs/retrieval-policy.md
+检查项 D：ls docs/working-set.json
+```
 
-## 非目标
+| 结果 | 含义 | 动作 |
+|------|------|------|
+| A 不存在 | 未部署 Phase 1 | 从 Phase 1 开始 |
+| A 存在，B 不存在 | Phase 1 未完成 | 从 Phase 1.3 开始 |
+| A+B 存在，C 不存在 | Phase 1 完成，Phase 3 未部署 | 跳到 Phase 3（Phase 2 按需） |
+| A+B+C 存在，D 不存在 | Phase 1+3 完成，Phase 4 未部署 | 跳到 Phase 4 |
+| 全部存在 | 已完整部署 | 跳到 Part 2（日常运维） |
 
-这份 skill **不会**替你自动拍板、自动改规则，也不会把所有旧文档都继续维持成“活文档”。它提供的是治理 playbook，不是无限自动化引擎。
+> **在开始任何 Phase 之前**，向用户确认：
+> "我检测到工作区尚未部署 [Phase X]。需要我现在开始部署吗？部署前请确认已备份工作区。"
 
-它不试图做这些事：
-- 发布私有角色 lore 或内部组织文化
-- 打包个人记忆、日记或私有运行历史
-- 自动决定审批结果
-- 自动改政策或规则
-- 在 v1 里做全自动多 Agent 编排
-- 因为“怕以后要用”而让所有旧文档都保持 live
+---
 
-## 快速开始
+### Phase 1：事实分层基础
 
-先别急着改文件，先判清楚你遇到的是哪一种 drift。主线只有六步：
-1. 分类问题
-2. 选择治理路径
-3. 找到应该回答问题的权威事实层
-4. 收紧文档角色和 freshness 边界
-5. 用代表性问题验证
-6. 在主线足够完整时主动收口
+> 目标：建立"什么是当前事实 vs 什么是历史背景"的区分能力。
+> 这是一切的根基，后续所有 Phase 都依赖它。
 
-如果工作区现在很乱，先减少歧义，不要先加流程。
+#### Phase 1.1：创建桥接文件
 
-## 核心工作流
+桥接文件回答"现在什么是真的"。你需要采集当前工作区的信息来填充它们。
 
-### 1. 先分类问题
+**操作 1：采集信息**
 
-先判断你面对的是哪一类 drift，不要一上来就盲改文件。先分清类型，后面所有动作才不会跑偏。
+执行以下命令并记录结果：
 
-你通常会遇到这些类型：
-- governance drift：角色、审批、审查边界或规则正在漂
-- current-state drift：现在到底什么是真的变得不清楚
-- retrieval drift：semantic search、bridge files、topic cards、long-term memory 开始互相打架
-- doc drift：旧文档还在假装自己代表当前事实
-- maintenance drift：live docs 太多，没有 working set，也没人做 freshness checks
-- phase drift：系统不停产出流程文档，却没有收口
+```bash
+# OpenClaw 版本
+openclaw --version 2>/dev/null || echo "unknown"
 
-不要先改文件，先判类型。
+# 目前有多少个 agent 配置
+ls ~/.openclaw/agents/ 2>/dev/null | head -20 || echo "none"
 
-### 2. 让不同变更走对治理路径
+# memory 目录结构
+ls -la memory/ 2>/dev/null || echo "no memory dir"
 
-实现改动、文档解释改动、治理/规则改动，不是一回事。复杂工作区里，最怕把所有改动都走同一条线。
+# 当前 cron 任务
+# 使用 cron(action=list) 工具获取
+```
 
-把工作类型区分清楚：
-- implementation change：普通实现或落地改动
-- documentation/explanation change：文档措辞、状态标签、说明层改动
-- governance/policy/process change：角色边界、审批规则、路由规则、维护规则改动
+**操作 2：创建目录**
 
-可使用这些通用角色：
-- **Coordinator**：定义问题、选路径、负责收口
-- **Implementer**：执行文件/脚本/操作改动
-- **Reviewer**：检查实现质量，揪明显问题
-- **Policy Auditor**：审治理、流程、规则变化
-- **Consensus Peer**：高风险结构变更前的可选同级会审
+```bash
+mkdir -p memory/health
+```
 
-常见部署形态：
-- **2-agent**：Coordinator+Implementer / Reviewer
-- **3-agent**：Coordinator / Implementer / Reviewer
-- **4-5-agent**：额外加入 Policy Auditor 和可选 Consensus Peer
+**操作 3：创建 `memory/SYSTEM_OVERVIEW.md`**
 
-基本规则：
-- 高风险工作里，不要让同一角色既实现又做最终审查
-- 治理/政策/流程改动要过 Policy Auditor
-- 高风险结构改动前，如果单一规划者判断不够，插入 consensus-peer 会审
-- 如果工作区里只有 1 个 agent，要明确写出“本来这里该有第二审”，不要假装自审等价
+用采集到的信息填充以下模板。不确定的字段填 `unknown`，不要瞎猜：
 
-按需阅读：
-- `references/multi-agent-governance.md`
+```markdown
+# System Overview
 
-v1 边界：
-- 这份 skill 提供可部署的治理指导
-- 它**不是** v1 的全自动多 Agent 编排系统
+Updated: [今天的日期，格式 YYYY-MM-DD]
 
-### 3. 建立权威事实分层
+## 当前系统配置
 
-不要把所有资料平均对待。真正的关键不是“资料多不多”，而是**冲突时谁说了算**。
+- OpenClaw 版本：[填采集结果]
+- Agent 数量：[填数量]，角色：[列出已知角色，如"主 Agent"、"代码 Agent"等]
+- 记忆后端：[填 qmd / 文件系统 / 无 / unknown]
+- 通信渠道：[填当前活跃的渠道，如 飞书 / Discord / Telegram]
 
-把这些层分清楚：
-- **canon**：规则、审批、硬边界
-- **bridge/current-state**：回答“现在什么是真的”的短文件
-- **health/consistency**：运行健康和一致性状态
-- **runtime snapshot**：某一时点的运行事实
-- **structured memory**：中等持久度的 topic/index 卡片
-- **long-term memory**：只保留高持久事实
-- **historical docs**：背景、旧阶段、旧计划、审计、报告
+## 当前运行状态
 
-两层冲突时，不要平均；必须决定谁赢。
+- 整体状态：[healthy / has-issues / unknown]
+- 活跃 cron 任务：[列出，或"无"]
+- 已知问题：[列出，或"无"]
 
-按需阅读：
-- `references/source-of-truth-layering.md`
-- `references/query-class-routing.md`
+## 活跃工作
 
-### 4. 先分 query class，再决定检索顺序
+- [向用户确认当前在做什么，或写"待确认"]
+```
 
-别抽象地问“语义搜索靠不靠谱”。真正该问的是：对哪一类问题靠谱？在什么 runtime / cache 对齐状态下靠谱？它是主裁决层还是辅助召回层？
+**操作 4：创建 `memory/health/current-health.json`**
+
+```json
+{
+  "updatedAt": "[今天的 ISO 时间戳，如 2026-03-25T12:00:00+08:00]",
+  "overall": "[根据实际情况填 healthy / has-issues / unknown]",
+  "domains": {
+    "governance": {
+      "status": "[ok 如果有多 Agent 且有审批流程，否则 unknown]",
+      "agentCount": [填数字],
+      "writeReviewSeparation": [true 如果已有写审分离，否则 false],
+      "note": "[简述当前治理状况]"
+    },
+    "memory": {
+      "status": "[ok 如果记忆系统在跑，否则 unknown]",
+      "backend": "[qmd / files / none / unknown]",
+      "note": "[简述]"
+    },
+    "retrieval": {
+      "status": "unknown",
+      "note": "检索路由策略尚未配置"
+    },
+    "automation": {
+      "status": "[ok 如果 cron/heartbeat 正常，否则 unknown]",
+      "cronHealthy": [true/false],
+      "note": "[简述]"
+    },
+    "maintenance": {
+      "status": "unknown",
+      "workingSetDefined": false,
+      "note": "working set 尚未定义"
+    }
+  }
+}
+```
+
+> **Impact**：创建这两个文件后，你回答"当前系统状态"类问题时，应优先读取这两个文件，而不是从散落的旧文档中拼凑。
+
+#### Phase 1.2：给现有文档打标签
 
-建议的 query class：
-- system-state
-- governance / rule-boundary
-- runtime-now
-- weekly-review / approval-state
-- user-preference / profile
-- historical trace / evidence
-- maintenance / upkeep
+**目的**：让旧文档停止假装自己是当前事实。
 
-默认策略：
-- governance → canon first
-- system-state → bridge/health first
-- runtime-now → snapshot first
-- user-preference → curated profile/manual sources first
-- historical trace → discovery + verification
-- semantic search → 除非明确验证更强，否则只作为 supporting layer
+**操作 1：扫描现有文档**
 
-按需阅读：
-- `references/query-class-routing.md`
-- `references/semantic-search-diagnostics.md`
+```bash
+python3 [skill_dir]/scripts/doc-status-scan.py --root docs --include-unlabeled 2>/dev/null
+```
 
-### 5. 给文档打角色边界
+如果 `docs/` 目录不存在或为空，跳过此步。
 
-旧文档最危险的不是存在，而是它还在假装自己代表 current truth。把 live docs 面积压小，系统才会稳。
+**操作 2：对每个 unlabeled 文件做判断**
 
-常见标签与角色：
-- `historical-reference`
-- `needs-refresh`
-- active/live maintenance docs
-- special-case active safety restriction
+逐个读取文件内容（前 30 行即可），用以下规则判断：
 
-尽量定义一个**最小 live subset**，其他默认降级成次级参考层。
+| 判断问题 | 如果答案是"是" | 操作 |
+|---------|-------------|------|
+| 这个文件记录的是已完成的计划、过去的阶段、旧的决策？ | 是 | 在文件第 1 行插入 `Status: historical-reference`，空一行后接原内容 |
+| 文件部分有用但整体不再可信？ | 是 | 在文件第 1 行插入 `Status: needs-refresh` |
+| 文件是安全限制、危险操作清单等？（不常更新但仍有效） | 是 | 在文件第 1 行插入 `Status: special-case active safety restriction` |
+| 文件仍然代表当前事实且需要持续维护？ | 是 | 不加标签，保持原样 |
 
-按需阅读：
-- `references/live-vs-historical-docs.md`
+**操作格式**：
 
-### 6. 建 working set 和 freshness checks
+```markdown
+Status: historical-reference
 
-working set 不是“所有重要文件”，而是“必须持续保鲜的最小活跃集合”。不要用一个统一阈值去管所有文档。
+# 原来的标题
+...原来的内容...
+```
 
-典型 working set 包括：
-- health / consistency 文件
-- bridge/current-state 文件
-- runtime snapshot
-- entrypoint/index docs
-- 只有最高价值的 topic cards
+> **如果文件数量多于 15 个**：不要一次全做。先处理 `docs/` 顶层的明显历史文件，向用户报告进度，分批完成。
 
-用分组阈值，不要用一个笼统阈值：
-- health/bridge/runtime/entry docs 用更短阈值
-- structured topic/index docs 用更长阈值
+> **Impact**：标记完成后，你在回答问题时必须遵守以下规则：
+> - 标有 `historical-reference` 的文件 → 不可用于回答"现在怎么样"类问题
+> - 标有 `needs-refresh` 的文件 → 可参考但必须与桥接文件交叉验证
+> - 标有 `special-case active safety restriction` 的文件 → 始终有效，不可降级
 
-用 freshness checker 把“谁应该记得更新一下”变成可重复执行的检查。
+#### Phase 1.3：在 AGENTS.md 中建立事实分层规则
 
-按需阅读：
-- `references/freshness-discipline.md`
+**操作**：在 AGENTS.md 中找到一个合适的位置（建议在文件前半部分，`## Memory` 段落之前或之后），插入以下内容：
 
-### 7. 认真诊断 semantic-search runtime
+> ⚠️ 不要覆盖 AGENTS.md！只做增量插入。
+> 先读取当前 AGENTS.md 的完整内容，找到插入位置，用 edit 工具精确插入。
 
-语义检索出问题时，最常见的坑不是模型不行，而是 path alignment、cache/index 混线，或者 split-brain（诊断一个索引、查询另一个索引）。
+```markdown
+## 事实分层（Source-of-Truth Layering）
 
-诊断时建议按这条线走：
-1. 先记录 before-state baseline
-2. 确认 runtime config 与 cache/index context 是否对齐
-3. 检查是否存在 split-brain
-4. 修掉明显的 indexing/embedding 缺口
-5. 用少量代表性 query classes 回归验证
-6. 不要给 blanket trust label，要按 query class 标可信度
+回答问题时按以下优先级查找信息。两层冲突时，上层赢：
 
-按需阅读：
-- `references/semantic-search-diagnostics.md`
+### 第 1 层：规则层（Canon）
+- `AGENTS.md` — 角色定义、审批规则、操作限制
+- 标有 `special-case active safety restriction` 的文档
+- 回答：规则是什么、谁负责什么、什么不能做
 
-### 8. 用代表性问题验证，而不是只看结构
+### 第 2 层：当前态层（Bridge）
+- `memory/SYSTEM_OVERVIEW.md` — 当前系统状态总览
+- `memory/health/current-health.json` — 健康状态
+- 回答：现在什么是真的、当前状态如何
 
-结构看起来整齐，不等于系统真的能回答问题。至少拿 system-state、governance、maintenance、historical/preference 这几类真实问题测一轮。
+### 第 3 层：记忆层（Memory）
+- `MEMORY.md` — 长期记忆
+- `memory/topics/` — 主题卡片（如有）
+- `memory/YYYY-MM-DD.md` — 日记
+- 回答：之前发生过什么、上次怎么做的
 
-最低验证集：
-- 一个 system-state 问题
-- 一个 governance 问题
-- 一个 maintenance 问题
-- 一个 historical 或 preference 问题
+### 第 4 层：历史层（Historical）
+- 标有 `historical-reference` 的文档
+- 标有 `needs-refresh` 的文档（使用时需交叉验证）
+- 用途：仅作为背景参考，不得作为当前状态的依据
 
-判定结果建议只用三种：
-- PASS
-- PASS WITH ESCALATION
-- FAIL
+### 分层规则
+- 标有 `historical-reference` 的文件**不得**用于回答"现在怎么样"类问题
+- 标有 `needs-refresh` 的文件可以参考但必须与第 2 层交叉验证
+- 不确定某文件是否代表当前事实时，优先查第 2 层桥接文件
+```
 
-只有当较小的 live subset 也确实能回答日常问题时，才算成立。
+> **Impact**：插入此规则后，你的检索行为必须改变——
+> 收到"当前系统状态"类问题时，第一步是读 `memory/SYSTEM_OVERVIEW.md`，不是 memory_search。
+> 收到规则类问题时，第一步是读 AGENTS.md，不是搜记忆。
 
-### 9. 主动收尾，不要无限扩相
+#### Phase 1.4：验证
 
-如果一个 phase 已经主线落地，就该收口进 maintenance observation（维护观察期），而不是继续生产更多流程文档。
+自行执行以下验证：
 
-每个 phase 都要明确：
-- 什么是 **landed**
-- 什么是 **improving**
-- 什么是 **deferred**
-- 主线是否已经足够完整，可以关闭
+1. 确认 `memory/SYSTEM_OVERVIEW.md` 存在且内容非空
+2. 确认 `memory/health/current-health.json` 存在且 JSON 合法
+3. 确认 AGENTS.md 中包含"事实分层"段落
+4. 如果处理过文档标签：确认至少有 1 个文件被正确标记
 
-一旦主线够完整：
-- 转入 maintenance observation
-- 保持 live subset 尽量小
-- 做小修，不要再开一轮 sprawling phase
+向用户报告：
+"Phase 1 部署完成。已创建桥接文件 [列出]，标记了 [N] 个历史文档，在 AGENTS.md 中添加了事实分层规则。从现在开始，我回答状态问题会优先读桥接文件。"
 
-按需阅读：
-- `references/completion-criteria.md`
+---
 
-## v1 推荐脚本
+### Phase 2：多 Agent 治理（可选）
 
-这些脚本覆盖 v1 最关键的三条治理检查线：freshness、semantic runtime、doc status。
+> 跳过条件：如果工作区只有 1 个 Agent 且用户没有扩展计划，可以跳过。
+> 但即使只有 1 个 Agent，也建议至少添加"核心文件保护"规则（见 Phase 2.3）。
 
-- `scripts/freshness-check.py`
-- `scripts/semantic-runtime-check.sh`
-- `scripts/doc-status-scan.py`
+#### Phase 2.1：检测现有角色
 
-## v1 推荐参考文档
+```bash
+# 检查 AGENTS.md 中是否已有角色定义
+grep -i "角色\|Role.*Definition\|Coordinator\|Implementer\|Reviewer\|Policy Auditor" AGENTS.md
+```
 
-这些 references 构成 v1 的主参考集；它们负责解释治理原则，不负责替你自动执行一切。
+如果已有角色定义，向用户确认是否需要补充治理规则。如果没有，继续。
 
-- `references/multi-agent-governance.md`
-- `references/source-of-truth-layering.md`
-- `references/query-class-routing.md`
-- `references/live-vs-historical-docs.md`
-- `references/freshness-discipline.md`
-- `references/semantic-search-diagnostics.md`
-- `references/completion-criteria.md`
+#### Phase 2.2：询问用户角色映射
 
-## v1 推荐示例
+向用户提问：
 
-先用这些示例建 working set、system-state index 和 health 示例，再按你的工作区实际情况收窄。
+"Phase 2 需要定义角色分工。请告诉我：
+1. 当前有哪些 Agent？各自叫什么名字、用什么模型？
+2. 哪个 Agent 负责写代码/改文件？（Implementer）
+3. 哪个 Agent 负责审查？（Reviewer）
+4. 是否需要独立的规则审核角色？（Policy Auditor）
+5. 如果只有 1 个 Agent，是否希望我添加核心文件保护规则？"
 
-- `assets/examples/working-set.example.md`
-- `assets/examples/working-set.example.json`
-- `assets/examples/current-health.example.json`
-- `assets/examples/system-state-index.example.md`
+**等待用户回复后**，根据回复填充以下模板。
 
-## v1 叙事要收紧
+#### Phase 2.3：插入角色与路由规则
 
-这是一份 workspace governance tool / governance playbook。它包含多 Agent 治理指导，但它不是 roleplay 包，也不是 v1 的全自动 multi-agent orchestrator。
+在 AGENTS.md 中，在"事实分层"段落之后插入：
 
-它最核心的承诺只有五条：
-- 减少 drift
-- 让 current truth 更容易识别
-- 把 live docs 面积压小
-- 让 semantic retrieval 更可控
-- 让维护更可持续
+> ⚠️ 以下内容需要根据用户回复填充具体的 Agent 名称和模型。方括号 [] 内的内容必须替换。
 
-## 发布与草案边界
+```markdown
+## 角色定义与变更路由
 
-当前正式发布内容以本目录下的 package-local 文件为准。旧的 `docs/skill-draft-*` 文件属于设计历史，不应继续和当前发布包竞争解释权。
+### 角色映射
 
-## Package rule
+| 角色 | 职责 | Agent | 模型 |
+|------|------|-------|------|
+| Coordinator | 任务拆分、路径选择、收口 | [填 Agent 名] | [填模型] |
+| Implementer | 文件/代码改动执行 | [填 Agent 名] | [填模型] |
+| Reviewer | 实现质量审查 | [填 Agent 名] | [填模型] |
+| Policy Auditor | 治理/规则审核 | [填 Agent 名，如无则写"由用户担任"] | [填模型] |
 
-During the current release line, review the package-local files in this directory first. Treat older `docs/skill-draft-*` files as drafting history unless you are explicitly tracing design history.
+> 同一模型可担任不同角色，但同一份工作不得由同一 Agent 既写又审。
+
+### 变更路由
+
+| 变更类型 | 风险级别 | 路线 | 需要人工审批？ |
+|---------|---------|------|-------------|
+| 普通实现（bug修复、功能开发） | 低 | Implementer → Reviewer | 否 |
+| 普通实现 | 中（改默认行为） | Implementer → Reviewer | 是 |
+| 文档改动 | 低 | Implementer → Reviewer | 否 |
+| 文档改动 | 中（改操作含义） | Implementer → Reviewer → Policy Auditor | 是 |
+| 治理/规则变更 | 任何 | Policy Auditor → 人工审批 → 执行 | 是 |
+| 核心文件修改 | 任何 | Policy Auditor → 人工明确授权 → 执行 | 必须 |
+
+### 核心文件清单
+
+以下文件的修改**必须**经过审核和人工授权：
+- `AGENTS.md`
+- `USER.md`
+- `MEMORY.md`
+- `HEARTBEAT.md`
+- `IDENTITY.md`
+
+### 降级运行
+
+当可用 Agent 少于角色要求时：
+- 在执行记录中声明降级状态和独立性损失
+- 低风险工作可继续，中风险需人工确认，高风险必须等 Agent 恢复或获人工审批
+- 绝不假装自审等于独立审查
+```
+
+**如果只有 1 个 Agent**，使用简化版：
+
+```markdown
+## 核心文件保护
+
+以下文件的修改必须先向用户说明变更内容并获得明确授权：
+- `AGENTS.md`
+- `USER.md`
+- `MEMORY.md`
+- `HEARTBEAT.md`
+- `IDENTITY.md`
+
+执行中风险以上工作时，主动声明：
+"⚠️ 单 Agent 运行，本次变更缺少独立审查。需要你确认后我再执行。"
+```
+
+> **Impact**：插入此规则后——
+> - 你修改 AGENTS.md 前必须走审批流程（或请求人工授权）
+> - 你执行治理变更前必须经过 Policy Auditor（或人工）审核
+> - 降级运行时你必须主动声明
+
+#### Phase 2.4：验证
+
+1. 确认 AGENTS.md 中包含角色定义或核心文件保护规则
+2. 尝试描述"如果用户要求修改 AGENTS.md，你会怎么做"——应该包含审批步骤
+
+向用户报告完成。
+
+---
+
+### Phase 3：检索路由
+
+> 目标：按问题类型选择正确的检索方式。
+
+#### Phase 3.1：创建检索策略文件
+
+**操作**：创建 `docs/retrieval-policy.md`
+
+```markdown
+# 检索策略
+
+Updated: [今天的日期]
+
+## 查询分类与路由
+
+收到问题后，先判断类型，再按对应路线检索。
+
+### 类型 1：治理/规则
+> "谁负责什么" "需要审批吗" "什么是核心文件"
+
+路线：
+1. 读 AGENTS.md
+2. 读安全限制文档
+3. **不使用** memory_search
+
+### 类型 2：系统状态
+> "当前系统状态" "健康状况" "运行是否正常"
+
+路线：
+1. 读 memory/SYSTEM_OVERVIEW.md
+2. 读 memory/health/current-health.json
+3. memory_search 仅作为辅助补充
+
+### 类型 3：运行时
+> "当前用什么模型" "哪些 cron 在跑"
+
+路线：
+1. 读 runtime snapshot（如有）
+2. 读桥接文件
+3. memory_search 仅作为发现线索
+
+### 类型 4：用户偏好
+> "用户喜欢什么风格" "有什么特殊要求"
+
+路线：
+1. 读 USER.md
+2. 读 MEMORY.md 中的偏好段
+3. memory_search 仅次要补充
+4. ⚠️ 聊天记录搜索噪声大，不可直接信任
+
+### 类型 5：历史溯源
+> "上次怎么修的" "这功能什么时候加的"
+
+路线：
+1. memory_search 发现候选
+2. **打开候选文件原文验证**
+3. 不可只凭搜索片段下结论
+
+### 类型 6：维护/保鲜
+> "哪些文件过期了" "现在该维护什么"
+
+路线：
+1. 运行 freshness-check.py（如已配置）
+2. 读 working set 配置
+3. 通常不需要 memory_search
+```
+
+#### Phase 3.2：在 AGENTS.md 中激活
+
+在 AGENTS.md 的"事实分层"段落之后（或角色定义之后）插入：
+
+```markdown
+## 检索策略
+
+回答问题前，先判断问题类型（治理/状态/运行时/偏好/历史/维护），按 `docs/retrieval-policy.md` 中的路由表检索。
+
+关键规则：
+- 治理问题 → 直接读 AGENTS.md，不用 memory_search
+- 状态问题 → 先读桥接文件，不信旧 topic card
+- 历史问题 → memory_search 发现后必须打开原文验证
+```
+
+> **Impact**：激活后——
+> - 收到治理类问题时，你不再调用 memory_search，而是直接读 AGENTS.md
+> - 收到状态类问题时，你先读 SYSTEM_OVERVIEW.md 再考虑搜索
+> - 收到历史类问题时，memory_search 的结果必须经过文件验证才能用于回答
+
+#### Phase 3.3：验证
+
+1. 确认 `docs/retrieval-policy.md` 存在
+2. 确认 AGENTS.md 中包含"检索策略"段落
+3. 自检：描述收到"当前系统状态"问题时你的检索顺序——应该是"先读 SYSTEM_OVERVIEW"而不是"先 memory_search"
+
+向用户报告完成。
+
+---
+
+### Phase 4：保鲜自动化
+
+> 目标：关键文件过期时自动发现。
+
+#### Phase 4.1：设计 working set
+
+**操作 1：列出候选文件**
+
+```bash
+# 已有的桥接文件
+ls memory/SYSTEM_OVERVIEW.md memory/health/current-health.json 2>/dev/null
+
+# 核心指令文件
+ls AGENTS.md MEMORY.md 2>/dev/null
+
+# 运行时快照（如有）
+ls docs/runtime-snapshot*.md 2>/dev/null
+
+# 主题索引（如有）
+ls memory/TOPICS_INDEX.md 2>/dev/null
+```
+
+**操作 2：向用户确认**
+
+展示候选列表，问用户：
+"以下是我建议纳入保鲜监控的文件。请确认或调整：
+- [列出文件] — 阈值 [N] 天
+需要增删吗？"
+
+#### Phase 4.2：创建配置文件
+
+根据确认的文件列表，创建 `docs/working-set.json`：
+
+```json
+{
+  "groups": {
+    "health": 3,
+    "bridge": 3,
+    "entry": 5,
+    "structured": 7
+  },
+  "workingSet": [
+    {"group": "health", "path": "memory/health/current-health.json"},
+    {"group": "bridge", "path": "memory/SYSTEM_OVERVIEW.md"},
+    {"group": "entry", "path": "AGENTS.md"},
+    {"group": "structured", "path": "MEMORY.md"}
+  ]
+}
+```
+
+> 根据用户确认的实际列表调整 `workingSet` 数组。每个 entry 需要 `group`（对应阈值分组）和 `path`（相对于工作区根目录）。
+
+#### Phase 4.3：首次运行
+
+```bash
+python3 [skill_dir]/scripts/freshness-check.py \
+  --root [workspace_root] \
+  --config docs/working-set.json
+```
+
+向用户报告结果。如果有 WARN 项，说明哪些文件过期了。
+
+#### Phase 4.4：设置持续检查
+
+向用户提供两个选项：
+
+**选项 A：加入 HEARTBEAT.md**
+
+在 HEARTBEAT.md 末尾追加：
+
+```markdown
+# 保鲜检查
+# 每次心跳执行 freshness-check.py
+# 有 WARN 项时提醒老大，全 OK 时静默通过
+```
+
+**选项 B：创建 Cron Job**
+
+使用 cron 工具创建定时任务。
+
+让用户选择，然后执行。
+
+> **Impact**：配置完成后——
+> - 过期文件会被自动发现并报告
+> - 你在心跳/定时检查中发现过期文件时，应主动提醒用户更新
+
+#### Phase 4.5：验证
+
+1. 确认 `docs/working-set.json` 存在且 JSON 合法
+2. 确认 freshness-check.py 能正常运行
+3. 确认持续检查已配置（HEARTBEAT 或 Cron）
+
+向用户报告完成。
+
+---
+
+### 部署完成
+
+所有已部署的 Phase 完成后，执行最终验证：
+
+1. 更新 `memory/health/current-health.json`，将已部署的 domain 状态改为 `ok`
+2. 更新 `memory/SYSTEM_OVERVIEW.md` 中的"近期变更"段落
+3. 向用户报告完整的部署摘要
+
+---
+
+## Part 2：日常运维工作流
+
+> 以下是部署完成后的持续使用指南。
+> 当你被触发处理治理相关问题时，按以下流程操作。
+
+### 2.1 先分类问题
+
+遇到治理相关问题时，先判断是哪一类 drift：
+
+| 类型 | 信号 | 首要动作 |
+|------|------|---------|
+| governance drift | 角色/审批/规则边界在漂 | 检查 AGENTS.md 中的角色和路由定义 |
+| current-state drift | "现在什么是真的"不清楚 | 刷新桥接文件 |
+| retrieval drift | 搜索结果互相打架 | 按 `references/semantic-search-diagnostics.md` 诊断 |
+| doc drift | 旧文档冒充当前事实 | 打标签，缩小 live 面积 |
+| maintenance drift | 不知道该维护什么 | 运行 freshness-check.py |
+| phase drift | 流程文档越来越多但不收口 | 按 `references/completion-criteria.md` 评估是否可以关闭 |
+
+### 2.2 按变更类型选路线
+
+遵循 AGENTS.md 中定义的变更路由矩阵。
+如果 AGENTS.md 中没有定义路由（只做了 Phase 1），使用默认规则：
+- 普通改动 → 直接做
+- 改规则/改行为 → 先向用户说明再做
+- 改核心文件 → 必须用户授权
+
+### 2.3 检索时遵循路由策略
+
+遵循 `docs/retrieval-policy.md` 中的查询分类路由。
+核心原则：不同问题先问不同的信息源。
+
+### 2.4 维护桥接文件
+
+当以下情况发生时，主动更新桥接文件：
+- 系统配置发生变更 → 更新 SYSTEM_OVERVIEW.md
+- 健康状态变化 → 更新 current-health.json
+- 完成重大任务 → 更新 SYSTEM_OVERVIEW.md 的"活跃工作"段
+
+更新时同步修改 `Updated:` 日期。
+
+### 2.5 响应保鲜告警
+
+当 freshness-check 报告 WARN 时：
+1. 打开告警文件
+2. 检查内容是否仍准确
+3. 准确 → 只更新日期
+4. 不准确 → 更新内容 + 日期
+5. 不再需要保鲜 → 从 working-set.json 中移除
+
+### 2.6 主动收口
+
+当一个改进阶段的主线已落地时：
+- 标记 **landed**（已落地）/ **improving**（观察中）/ **deferred**（明确推迟）
+- 转入维护观察期
+- 不要继续生产新的流程文档
+
+详见 `references/completion-criteria.md`。
+
+---
+
+## Part 3：脚本与参考索引
+
+### 脚本
+
+| 脚本 | 用途 | 运行方式 |
+|------|------|---------|
+| `scripts/freshness-check.py` | 检查 working set 文件新鲜度 | `python3 [script] --root [workspace] --config [config.json]` |
+| `scripts/semantic-runtime-check.sh` | 语义搜索运行时诊断 | `bash [script] --cmd [cli] --config-home [path] --query "text"` |
+| `scripts/doc-status-scan.py` | 扫描文档 status label 分布 | `python3 [script] --root docs --include-unlabeled` |
+
+### 参考文档
+
+遇到具体问题时按需阅读，不需要提前全部读完：
+
+| 文档 | 何时阅读 |
+|------|---------|
+| `references/multi-agent-governance.md` | 设计/调整多 Agent 角色分工时 |
+| `references/source-of-truth-layering.md` | 不确定哪层信息应该赢时 |
+| `references/query-class-routing.md` | 调整检索策略时 |
+| `references/live-vs-historical-docs.md` | 大批量给文档打标签时 |
+| `references/freshness-discipline.md` | 设计 working set 和阈值时 |
+| `references/semantic-search-diagnostics.md` | 语义搜索返回奇怪结果时 |
+| `references/completion-criteria.md` | 判断改进阶段是否可以收口时 |
+
+### 示例模板
+
+| 模板 | 用途 |
+|------|------|
+| `assets/examples/working-set.example.json` | freshness-check 配置模板 |
+| `assets/examples/working-set.example.md` | working set 文档模板 |
+| `assets/examples/current-health.example.json` | 健康状态 JSON 模板 |
+| `assets/examples/system-state-index.example.md` | 系统状态索引模板 |
+
+---
+
+> **人类用户**：如需了解本 Skill 的设计原理、系统能力详解、适用场景分析和 FAQ，请阅读 `docs/GUIDE_ZH.md`（中文）或 `docs/GUIDE_EN.md`（English）。
