@@ -1,6 +1,6 @@
 # Reference Draft — Semantic Search Diagnostics
 
-Status: draft-for-skill
+Status: released
 Role: backend-aware diagnostic reference for semantic-search trust and failure analysis
 
 ## Scope

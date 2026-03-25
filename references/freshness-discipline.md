@@ -1,6 +1,6 @@
 # Reference Draft — Freshness Discipline
 
-Status: draft-for-skill
+Status: released
 Role: stable maintenance reference
 
 ## Purpose

@@ -1,6 +1,6 @@
 # Reference Draft — Source of Truth Layering
 
-Status: draft-for-skill
+Status: released
 Role: stable governance reference
 
 ## Purpose

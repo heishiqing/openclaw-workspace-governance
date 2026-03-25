@@ -1,6 +1,6 @@
 # Reference Draft — Completion Criteria
 
-Status: draft-for-skill
+Status: released
 Role: stable closure reference for deciding when a governance/improvement stream is landed, improving, deferred, or complete enough to close
 
 ## Scope

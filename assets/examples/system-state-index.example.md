@@ -1,29 +1,13 @@
 # 系统状态索引示例（System State Index Example）
 
-Last updated: 2026-03-23
-Status: active-draft
+Last updated: 2026-03-25
+Status: example
 
 ## 用途（Purpose）
 
-为当前 system-state 栈提供一份统一索引。
+为当前 system-state 栈提供一份统一索引。这是一个**模板**，需要根据你的工作区实际文件路径填写。
 
-Provide one index for the current system-state stack.
-
-当你需要快速找到以下内容时，先看这份索引：
-- governance truth（治理事实层）
-- current-state truth（当前态事实层）
-- drift status（漂移状态）
-- retrieval policy（检索策略）
-- health/consistency state（健康/一致性状态）
-- maintenance workflow（维护流程）
-
-Use this file when you need to quickly find:
-- governance truth
-- current-state truth
-- drift status
-- retrieval policy
-- health/consistency state
-- maintenance workflow
+Provide one index for the current system-state stack. This is a **template** — fill in your actual workspace file paths.
 
 ---
 
@@ -37,8 +21,8 @@ Read first for:
 
 Files:
 - `AGENTS.md`
-- `docs/multi-agent-routing.md`
-- `docs/source-of-truth-layering.md`
+- _(your governance routing doc)_
+- _(your source-of-truth layering doc)_
 
 ---
 
@@ -49,9 +33,9 @@ Read first for:
 - current runtime / current health / current consistency
 
 Files:
-- `docs/current-state-entrypoints-v1.md`
-- `docs/runtime-state-snapshot-2026-03-23.md`
-- `memory/health/current-health.md`
+- _(your entrypoints doc)_
+- _(your runtime snapshot doc)_
+- _(your health summary doc)_
 
 ---
 
@@ -63,9 +47,8 @@ Read first for:
 - explanation-layer trust level
 
 Files:
-- `docs/drift-checklist.md`
-- `docs/retrieval-diagnosis.md`
-- `docs/explanation-layer-status.md`
+- _(your drift checklist)_
+- _(your retrieval diagnosis doc)_
 
 ---
 
@@ -76,7 +59,7 @@ Read first for:
 - when bridge-first retrieval should override older structured memory
 
 Files:
-- `docs/retrieval-policy-current.md`
+- _(your retrieval policy doc)_
 - `memory/SEARCH_STATE.md`
 - `memory/SYSTEM_OVERVIEW.md`
 
@@ -90,6 +73,6 @@ Read first for:
 - whether the current stabilization cycle is complete enough to stop expanding
 
 Files:
-- `docs/freshness-discipline.md`
-- `docs/working-set.md`
-- `docs/completion-criteria.md`
+- _(your freshness discipline doc)_
+- _(your working set doc)_
+- _(your completion criteria doc)_

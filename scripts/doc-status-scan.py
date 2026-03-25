@@ -13,6 +13,10 @@ Recognized labels:
 - needs-refresh
 - special-case active safety restriction
 
+Note: Only scans the first 12 lines of each file for status labels.
+Labels deeper in the file will not be detected. Place status labels
+near the top of your markdown files (in frontmatter or first heading).
+
 Usage:
   scripts/doc-status-scan.py --root docs
   scripts/doc-status-scan.py --root docs --json

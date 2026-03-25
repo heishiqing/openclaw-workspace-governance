@@ -1,7 +1,7 @@
 # 工作集示例（Working Set Example）
 
-Last updated: 2026-03-23
-Status: active-draft
+Last updated: 2026-03-25
+Status: example
 
 ## 用途（Purpose）
 
@@ -16,25 +16,20 @@ List the minimum set of files that should receive routine freshness attention.
 ### 健康 / 一致性（Health / consistency）
 - `memory/health/current-health.json`
 - `memory/health/current-health.md`
-- `memory/health/memory-consistency.json`
-- `memory/health/memory-consistency.md`
 
 ### 桥接文件（Bridge files）
 - `memory/SYSTEM_OVERVIEW.md`
 - `memory/SEARCH_STATE.md`
 
 ### 运行态（Runtime）
-- `docs/runtime-state-snapshot-2026-03-23.md`
-- `docs/runtime-snapshot-refresh-process.md`
+- `docs/runtime-snapshot.md`
 
 ### 入口 / 索引层（Entry / index layer）
-- `docs/current-state-entrypoints-v1.md`
-- `docs/system-state-index-v1.md`
+- `docs/entrypoints.md`
+- `docs/system-state-index.md`
 
 ### 与当前态高度重叠的结构化记忆（Structured memory with high current-value overlap）
 - `memory/TOPICS_INDEX.md`
-- `memory/topics/system-state.md`
-- `memory/topics/active-work.md`
 
 ---
 

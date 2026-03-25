@@ -1,6 +1,6 @@
 # Reference Draft — Live vs Historical Docs
 
-Status: draft-for-skill
+Status: released
 Role: stable doc-governance reference for live/current vs historical/background boundaries
 
 ## Scope

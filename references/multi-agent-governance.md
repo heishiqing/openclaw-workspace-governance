@@ -1,6 +1,6 @@
 # Reference Draft — Multi-Agent Governance
 
-Status: draft-for-skill
+Status: released
 Role: deployable governance guide for supervised deployment, routing, and downgrade-run operation (no full automation support in v1)
 
 ## Scope

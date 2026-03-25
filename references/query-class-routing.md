@@ -1,6 +1,6 @@
 # Reference Draft — Query-Class Routing
 
-Status: draft-for-skill
+Status: released
 Role: stable routing reference
 
 ## Purpose

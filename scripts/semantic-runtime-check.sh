@@ -13,6 +13,10 @@ set -euo pipefail
 # - run status
 # - run a small set of representative queries
 # - avoid pretending this is a universal backend-neutral checker
+#
+# Assumptions:
+# - The CLI specified by --cmd supports: `<cmd> status` and `<cmd> query "<text>"`
+# - If your semantic backend uses different subcommands, adapt lines ~100-115.
 
 usage() {
   cat <<'EOF'
