@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="#-简体中文">🇨🇳 简体中文</a> &nbsp;·&nbsp; <a href="#-english">🇬🇧 English</a>
+  <a href="docs/GUIDE_ZH.md">🇨🇳 简体中文详细指南</a> &nbsp;·&nbsp; <a href="docs/GUIDE_EN.md">🇬🇧 English Detailed Guide</a>
 </p>
 
 ---
